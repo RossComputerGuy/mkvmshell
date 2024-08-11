@@ -1,2 +1,3 @@
-# mknixosshell
-"mkNixOSShell" is a concept way of securly containerizing Nix devShells
+# mkVMShell
+
+A way of containerizing Nix dev shells in a VM.

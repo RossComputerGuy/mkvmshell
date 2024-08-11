@@ -6,8 +6,8 @@ let
   };
 in
 {
-  mkNixOSShell = drv: mkShell (rec {
-    name = drv.name or "nixos-shell";
+  mkVMShell = drv: mkShell (rec {
+    name = drv.name or "vm-shell";
 
     QEMU_OPTS = [
       "-m 512"

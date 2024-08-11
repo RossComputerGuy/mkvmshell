@@ -19,6 +19,6 @@
       in {
         legacyPackages = pkgs;
 
-        devShells.default = pkgs.mkNixOSShell {};
+        devShells.default = pkgs.mkVMShell {};
       });
 }
