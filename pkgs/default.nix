@@ -18,7 +18,7 @@ in
         export PATH=${util-linux}/bin:${coreutils}/bin
 
         mkdir -p "$HOME"
-        mount -t 9p home "$HOME" -o trans=virtio,version=9p2000.L,msize=131072
+        mount -t 9p home "$HOME" -o trans=virtio,version=9p2000.L,msize=131072,mode=ro
       fi
 
       export shellHook=${drv.shellHook or ""}
@@ -32,7 +32,7 @@ in
       export > $TMPDIR/xchg/saved-env
 
       if [[ ! -n "$dontBindHome" ]]; then
-        export QEMU_OPTS="$QEMU_OPTS -virtfs local,path=$HOME,security_model=none,mount_tag=home"
+        export QEMU_OPTS="$QEMU_OPTS -virtfs local,path=$HOME,security_model=none,mount_tag=home,readonly=on"
       fi
 
       ${pkgs.vmTools.qemuCommandLinux}
