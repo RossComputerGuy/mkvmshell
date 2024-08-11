@@ -13,7 +13,7 @@ in
       "-m 512"
     ] ++ lib.optional (drv ? QEMU_OPTS) drv.QEMU_OPTS;
 
-    origBuilder = writeShellScript ("${name}-shell") ''
+    origBuilder = writeShellScript ("${name}-init") ''
       if [[ ! -n "$dontBindHome" ]]; then
         export PATH=${util-linux}/bin:${coreutils}/bin
 
@@ -41,21 +41,35 @@ in
       source /tmp/xchg/saved-env
       echo "$HOSTNAME" >/proc/sys/kernel/hostname
 
-      export name=${name}
-      export shellHook=${drv.shellHook or ""}
+      if [[ -n "$dontSetUser" ]]; then
+        export USER_UID=$(id -u)
+        export USER_GID=$(id -g)
+      else
+        echo "$USER:x:$USER_UID:$USER_GID::$HOME:$SHELL" >> /etc/passwd
 
-      export OLD_PWD=$PWD
-      export OLD_PATH=$PATH
-      unset QEMU_OPTS
+        chown "$USER_UID:$USER_GID" /dev/${qemu-common.qemuSerialDevice}
+      fi
 
-      cd $OLD_PWD
-      unset OLD_PWD
+      exec ${busybox}/bin/setuidgid $USER_UID:$USER_GID \
+        ${writeShellScript "${name}-shell" ''
+          source /tmp/xchg/saved-env
 
-      source ${stdenv}/setup
-      export PATH=$PATH:$OLD_PATH
-      unset OLD_PATH
+          export name=${name}
+          export shellHook=${drv.shellHook or ""}
 
-      exec ${busybox}/bin/setsid ${bashInteractive}/bin/bash < /dev/${qemu-common.qemuSerialDevice} &> /dev/${qemu-common.qemuSerialDevice}
+          export OLD_PWD=$PWD
+          export OLD_PATH=$PATH
+          unset QEMU_OPTS
+
+          cd $OLD_PWD
+          unset OLD_PWD
+
+          source ${stdenv}/setup
+          export PATH=$PATH:$OLD_PATH
+          unset OLD_PATH
+
+          exec ${busybox}/bin/setsid ${bashInteractive}/bin/bash < /dev/${qemu-common.qemuSerialDevice} &> /dev/${qemu-common.qemuSerialDevice}
+        ''}
     '';
 
     shellHook = ''
@@ -68,6 +82,11 @@ in
       fi
 
       export HOSTNAME=$(hostname)
+
+      if [[ ! -n "$dontSetUser" ]]; then
+        export USER_UID=$(id -u)
+        export USER_GID=$(id -g)
+      fi
 
       mkdir -p $TMPDIR/xchg
       export > $TMPDIR/xchg/saved-env
