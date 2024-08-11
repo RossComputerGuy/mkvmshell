@@ -64,11 +64,15 @@ in
           cd $OLD_PWD
           unset OLD_PWD
 
-          source ${stdenv}/setup
-          export PATH=$PATH:$OLD_PATH
-          unset OLD_PATH
+          exec ${busybox}/bin/setsid ${bashInteractive}/bin/bash --init-file ${writeShellScript "${name}-shinit" ''
+            source ${stdenv}/setup
+            export PATH=$PATH:$OLD_PATH
+            unset OLD_PATH
 
-          exec ${busybox}/bin/setsid ${bashInteractive}/bin/bash < /dev/${qemu-common.qemuSerialDevice} &> /dev/${qemu-common.qemuSerialDevice}
+            if [[ -e $HOME/.bashrc ]]; then
+              source $HOME/.bashrc
+            fi
+          ''} < /dev/${qemu-common.qemuSerialDevice} &> /dev/${qemu-common.qemuSerialDevice}
         ''}
     '';
 
