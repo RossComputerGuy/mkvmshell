@@ -21,7 +21,14 @@
       in {
         legacyPackages = pkgs;
 
-        devShells.default = pkgs.mkVMShell {};
+        devShells = {
+          default = pkgs.mkVMShell {};
+          aarch64-linux = (if pkgs.targetPlatform.isAarch64 && pkgs.targetPlatform.isLinux then pkgs else pkgs.pkgsCross.aarch64-multiplatform).mkVMShell {};
+          i686-linux = (if pkgs.targetPlatform.isi686 && pkgs.targetPlatform.isLinux then pkgs else pkgs.pkgsCross.gnu32).mkVMShell {};
+          x86_64-linux = (if pkgs.targetPlatform.isx86_64 && pkgs.targetPlatform.isLinux then pkgs else pkgs.pkgsCross.gnu64).mkVMShell {};
+          riscv32-linux = (if pkgs.targetPlatform.isRiscV32 && pkgs.targetPlatform.isLinux then pkgs else pkgs.pkgsCross.riscv32).mkVMShell {};
+          riscv64-linux = (if pkgs.targetPlatform.isRiscV64 && pkgs.targetPlatform.isLinux then pkgs else pkgs.pkgsCross.riscv64).mkVMShell {};
+        };
       }) // {
         inherit (nixpkgs) lib;
 
