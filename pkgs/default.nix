@@ -4,8 +4,16 @@ let
     inherit pkgs;
     inherit (pkgs) lib;
   };
+
+  mkShell = callPackage "${pkgs.path}/pkgs/build-support/mkshell" {};
+
+  config = {
+    useVMShell = false;
+  } // pkgs.config;
 in
 {
+  mkShell = if config.useVMShell then pkgs.mkVMShell else mkShell;
+
   mkVMShell = drv: mkShell (rec {
     name = drv.name or "vm-shell";
 

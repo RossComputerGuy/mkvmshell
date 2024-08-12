@@ -13,12 +13,18 @@
   }:
     flake-utils.lib.eachSystem (import systems) (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system}.appendOverlays [
-          (import ./pkgs/default.nix)
-        ];
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ self.overlays.default ];
+          config.useVMShell = true;
+        };
       in {
         legacyPackages = pkgs;
 
         devShells.default = pkgs.mkVMShell {};
-      });
+      }) // {
+        inherit (nixpkgs) lib;
+
+        overlays.default = import ./pkgs/default.nix;
+      };
 }
