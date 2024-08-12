@@ -117,7 +117,9 @@ in
         export QEMU_OPTS="$QEMU_OPTS -virtfs local,path=/run/current-system,security_model=none,mount_tag=nixos-system,readonly=on"
       fi
 
-      ${pkgs.vmTools.qemuCommandLinux}
+      ${(pkgs.vmTools.override {
+        customQemu = qemu-common.qemuBinary pkgs.buildPackages.qemu;
+      }).qemuCommandLinux}
 
       if ! test -e $TMPDIR/xchg/in-vm-exit; then
         echo "Virtual machine didn't produce an exit code."
