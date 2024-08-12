@@ -49,6 +49,8 @@ in
       source /tmp/xchg/saved-env
       echo "$HOSTNAME" >/proc/sys/kernel/hostname
 
+      export PATH=${util-linux}/bin:${coreutils}/bin
+
       if [[ -n "$dontSetUser" ]]; then
         export USER_UID=$(id -u)
         export USER_GID=$(id -g)
